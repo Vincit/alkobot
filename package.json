@@ -1,0 +1,27 @@
+{
+  "name": "alkobot",
+  "version": "1.0.0",
+  "description": "Vincit alkobot",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ipelkonen/alkobot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ipelkonen/alkobot/issues"
+  },
+  "homepage": "https://github.com/ipelkonen/alkobot#readme",
+  "dependencies": {
+    "@slack/bolt": "^3.12.2",
+    "date-holidays": "^3.18.0",
+    "fs": "^0.0.1-security",
+    "memory-cache": "^0.2.0",
+    "openai": "^3.2.1",
+    "openai-api": "^1.3.1"
+  }
+}
