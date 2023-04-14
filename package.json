@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ipelkonen/alkobot.git"
+    "url": "git+https://github.com/Vincit/alkobot.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ipelkonen/alkobot/issues"
+    "url": "https://github.com/Vincit/alkobot/issues"
   },
-  "homepage": "https://github.com/ipelkonen/alkobot#readme",
+  "homepage": "https://github.com/Vincit/alkobot#readme",
   "dependencies": {
     "@slack/bolt": "^3.12.2",
     "date-holidays": "^3.18.0",
