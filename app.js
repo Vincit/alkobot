@@ -59,7 +59,7 @@ slackApp.event('app_mention', async ({ event, say }) => {
   }
 
   // Leave channel when requested by an admin
-  if (botAdmins.find(user) && queryWithoutMention.toLowerCase().startsWith('please leave this channel')) {
+  if (botAdmins.includes(user) && queryWithoutMention.toLowerCase().startsWith('please leave this channel')) {
     slackApp.client.conversations.leave({ channel: event.channel });
     return;
   }
@@ -78,7 +78,7 @@ slackApp.event('message', async ({ event, say }) => {
   }
 
   const userInfo = await slackApp.client.users.info({ user });
-  
+
   const message = await alkoSearch(text, userInfo.user?.profile?.display_name || '');
   return await say({ text: message, thread_ts: event.thread_ts });
 });
