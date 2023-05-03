@@ -8,9 +8,11 @@ const isClosedMessage = require('./isClosedMessage');
 const isDevelopmentMode = process.env.NODE_ENV === 'development';
 const certPath = '/home/ilkka/cert';
 
+const botAdmins = process.env.BOT_ADMINS ? process.env.BOT_ADMINS.split(',') : [];
+
 // read certificates from disk
-const privateKey = fs.readFileSync(isDevelopmentMode ? path.join(certPath, 'express-selfsigned.key') : path.join(certPath, 'gaiafm_org.key'), 'utf8');
-const certificate = fs.readFileSync(isDevelopmentMode ? path.join(certPath, 'express-selfsigned.crt') : path.join(certPath, 'gaiafm_org.crt'), 'utf8');
+const privateKey = fs.readFileSync(path.join(certPath, isDevelopmentMode ? 'express-selfsigned.key' : 'gaiafm_org.key'), 'utf8');
+const certificate = fs.readFileSync(path.join(certPath, isDevelopmentMode ? 'express-selfsigned.crt' : 'gaiafm_org.crt'), 'utf8');
 const chain = isDevelopmentMode ? '' : fs.readFileSync(path.join(certPath, 'gaiafm_org.ca-bundle'), 'utf8');
 const credentials = { key: privateKey, cert: certificate, ca: chain };
 
@@ -22,7 +24,7 @@ const slackApp = new Slack.App({
 setInterval(async () => {
   if (new Date().getHours() === 11) {
     const closed = await alkoIsClosed();
-    if (closed.tomorrow) {
+    if (!closed.today && closed.tomorrow) {
       const conversations = await slackApp.client.users.conversations({
         exclude_archived: true,
         types: 'public_channel,private_channel',
@@ -56,8 +58,8 @@ slackApp.event('app_mention', async ({ event, say }) => {
     return await say({ text: message, thread_ts: event.thread_ts });
   }
 
-  // Leave channel when requested by Ilkka Pelkonen
-  if (user === 'U03T8HLSPAS' && queryWithoutMention.toLowerCase().startsWith('please leave this channel')) {
+  // Leave channel when requested by an admin
+  if (botAdmins.find(user) && queryWithoutMention.toLowerCase().startsWith('please leave this channel')) {
     slackApp.client.conversations.leave({ channel: event.channel });
     return;
   }
@@ -76,7 +78,7 @@ slackApp.event('message', async ({ event, say }) => {
   }
 
   const userInfo = await slackApp.client.users.info({ user });
-
+  
   const message = await alkoSearch(text, userInfo.user?.profile?.display_name || '');
   return await say({ text: message, thread_ts: event.thread_ts });
 });
@@ -84,5 +86,5 @@ slackApp.event('message', async ({ event, say }) => {
 (async () => {
   // Start the app
   await slackApp.start(3003, credentials);
-  console.log('Slack app is running!');
+  console.log('Alkobot is running!');
 })();
