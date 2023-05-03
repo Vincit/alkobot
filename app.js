@@ -9,7 +9,7 @@ const isDevelopmentMode = process.env.NODE_ENV === 'development';
 const certPath = '/home/ilkka/cert';
 
 const botAdmins = process.env.BOT_ADMINS ? process.env.BOT_ADMINS.split(',') : [];
-
+console.log(botAdmins);
 // read certificates from disk
 const privateKey = fs.readFileSync(path.join(certPath, isDevelopmentMode ? 'express-selfsigned.key' : 'gaiafm_org.key'), 'utf8');
 const certificate = fs.readFileSync(path.join(certPath, isDevelopmentMode ? 'express-selfsigned.crt' : 'gaiafm_org.crt'), 'utf8');
@@ -57,7 +57,7 @@ slackApp.event('app_mention', async ({ event, say }) => {
     const message = await isClosedMessage(await alkoIsClosed());
     return await say({ text: message, thread_ts: event.thread_ts });
   }
-
+console.log(user);
   // Leave channel when requested by an admin
   if (botAdmins.includes(user) && queryWithoutMention.toLowerCase().startsWith('please leave this channel')) {
     slackApp.client.conversations.leave({ channel: event.channel });
