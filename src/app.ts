@@ -126,6 +126,6 @@ slackApp.event('message', async ({ event, say }) => {
 
 (async () => {
   // Start the app
-  await slackApp.start(3003);
+  await slackApp.start(8080);
   console.log('Alkobot is running!');
 })();
