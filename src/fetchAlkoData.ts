@@ -7,7 +7,7 @@ export default async () => {
   if(!data) {
     console.log(1);
     data = (await fetch(STORES_URL)).json();
-    console.log(2);
+    console.log(data.slice(50));
     cache.put('alko-data', data, 1000 * 60 * 30);
   }
 
