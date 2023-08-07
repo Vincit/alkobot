@@ -19,7 +19,6 @@ Avoinna tänään: ${store.OpenDay0 === '0' ? 'Suljettu' : store.OpenDay0}
 Avoinna huomenna: ${store.OpenDay1 === '0' ? 'Suljettu' : store.OpenDay1}`).join(`
 ----------------------------------------
 `);
-    console.log(6);
     return message;
   } catch (e) {
     console.error('alkoSearch: alkoSearch', e);
