@@ -5,7 +5,9 @@ export default async () => {
   let data = cache.get('alko-data');
 
   if(!data) {
+    console.log(1);
     data = (await fetch(STORES_URL)).json();
+    console.log(2);
     cache.put('alko-data', data, 1000 * 60 * 30);
   }
 
