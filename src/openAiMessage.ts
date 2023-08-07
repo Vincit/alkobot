@@ -1,4 +1,4 @@
-const { Configuration, OpenAIApi } = require('openai');
+import { Configuration, OpenAIApi } from "openai";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const configuration = new Configuration({
@@ -6,22 +6,26 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
+export type Message = {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+};
 
-const openAiMessage = async (messages) => {
+export default async (messages: Message[]) => {
   if (!configuration.apiKey) {
     return 'OpenAI ei vastaa, koska API key puuttuu :sadpanda:';
   }
   try {
     const response = await openai.createChatCompletion({
       model: 'gpt-4',
-      messages: messages,
+      messages,
       temperature: 0.2,
       max_tokens: 2000,
       n: 1,
       stream: false,
     });
     return response.data.choices[0].message.content;
-  } catch (error) {
+  } catch (error: any) {
     if (error.response) {
       console.error(error.response.status, error.response.data);
     } else {
@@ -31,8 +35,6 @@ const openAiMessage = async (messages) => {
 
   return 'OpenAI ei vastaa :sadpanda:';
 };
-
-module.exports = openAiMessage;
 
 
 

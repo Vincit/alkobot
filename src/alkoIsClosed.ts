@@ -1,10 +1,10 @@
-const Holidays = require('date-holidays');
-const fetchAlkoData = require('./fetchAlkoData');
+import Holidays from "date-holidays";
+import fetchAlkoData from "./fetchAlkoData";
 
 const holidays = new Holidays('FI');
 const REFERENCE_IDS = ['2102', '2196', '2198', '2161'];
 
-const alkoIsClosed = async () => {
+export default async () => {
   try {
     const data = await fetchAlkoData();
     const referenceStores = data.stores.filter(store => REFERENCE_IDS.includes(store.storeId));
@@ -28,5 +28,3 @@ const alkoIsClosed = async () => {
     };
   }
 };
-
-module.exports = alkoIsClosed;

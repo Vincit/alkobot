@@ -1,6 +1,7 @@
-const cache = require('memory-cache');
+import cache from "memory-cache";
+
 const STORES_URL = 'https://www.alko.fi/INTERSHOP/web/WFS/Alko-OnlineShop-Site/fi_FI/-/EUR/ALKO_ViewStoreLocator-StoresJSON';
-const fetchAlkoData = async () => {
+export default async () => {
   let data = cache.get('alko-data');
 
   if(!data) {
@@ -10,5 +11,3 @@ const fetchAlkoData = async () => {
 
   return data;
 }
-
-module.exports = fetchAlkoData;

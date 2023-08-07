@@ -1,15 +1,15 @@
-const openAiMessage = require('./openAiMessage');
-const getIsClosedDataMessage = require('./getIsClosedDataMessage');
+import openAiMessage, {Message} from "./openAiMessage";
+import getIsClosedDataMessage from "./getIsClosedDataMessage";
 
-const commonMessage = {
+const commonMessage: Message = {
   role: 'system',
   content: 'Olet Alkon chat asiakaspalvelija. Vastaa viestiin hauskasti. Suosittele viesteissä jotain vuodenaikaan sopivaa alkoholijuomaa. Tänään on:' + new Date().toString(),
 };
 
-const isClosedMessage = async (isClosedData) => {
+export default async (isClosedData) => {
   try {
     const isClosedDataMessage = getIsClosedDataMessage(isClosedData);
-    const isClosedPrompt = {
+    const isClosedPrompt: Message = {
       role: 'system',
       content: 'Kerro hauskasti onko Alko auki. Jos se on kiinni, se on paha asia ja varoita siitä',
     };
@@ -21,5 +21,3 @@ const isClosedMessage = async (isClosedData) => {
     return isClosedData.tomorrow ? closedTomorrowMessage : openTomorrowMessage;
   }
 };
-
-module.exports = isClosedMessage;
