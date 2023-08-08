@@ -6,12 +6,12 @@ const commonMessage: Message = {
   content: 'Olet Alkon chat asiakaspalvelija. Vastaa viestiin hauskasti. Suosittele viesteissä jotain vuodenaikaan sopivaa alkoholijuomaa. Tänään on:' + new Date().toString(),
 };
 
-export default async (isClosedData) => {
+export default async (isClosedData, language) => {
   try {
     const isClosedDataMessage = getIsClosedDataMessage(isClosedData);
     const isClosedPrompt: Message = {
       role: 'system',
-      content: 'Kerro hauskasti onko Alko auki. Jos se on kiinni, se on paha asia ja varoita siitä',
+      content: `Kerro hauskasti onko Alko auki. Jos se on kiinni, se on paha asia ja varoita siitä. Kirjoita kielellä "${language}".`,
     };
     const message = await openAiMessage([commonMessage, isClosedDataMessage, isClosedPrompt]);
     return message;

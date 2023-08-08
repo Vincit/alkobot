@@ -44,7 +44,8 @@ setInterval(async () => {
         if (name.startsWith('1vincit') || name.startsWith('ask-')) {
           slackApp.client.conversations.leave({ channel: id });
         } else {
-          slackApp.client.chat.postMessage({ channel: id, text: await isClosedMessage(closed) });
+          const info = await slackApp.client.conversations.info({ channel: id });
+          slackApp.client.chat.postMessage({ channel: id, text: await isClosedMessage(closed, getLanguage(info?.channel?.topic?.value || '')) });
         }
       });
     }
@@ -65,7 +66,7 @@ slackApp.event('app_mention', async ({ event, say }) => {
   const queryWithoutMention = text.slice(userMentionString.length).trim();
 
   if (queryWithoutMention.length < 2) {
-    const message = await isClosedMessage(await alkoIsClosed());
+    const message = await isClosedMessage(await alkoIsClosed(), getLanguage(text));
     await say({ text: message, thread_ts: event.thread_ts });
     return;
   }
