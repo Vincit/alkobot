@@ -6,6 +6,7 @@ import {GenericMessageEvent} from "@slack/bolt/dist/types/events/message-events"
 import getIsClosedDataMessage from "./getIsClosedDataMessage";
 import openAiMessage, {Message} from "./openAiMessage";
 import { ConversationsHistoryResponse } from "@slack/web-api";
+import { v2 } from "@google-cloud/translate";
 
 const botAdmins = process.env.BOT_ADMINS ? process.env.BOT_ADMINS.split(',') : [];
 
@@ -13,6 +14,22 @@ const slackApp = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   token: process.env.SLACK_BOT_TOKEN,
 });
+
+let googleTranslate: v2.Translate = null;
+
+async function getLanguage(text) {
+  let [detections] = await googleTranslate.detect(text);
+
+  if (Array.isArray(detections)) {
+    if (detections.length < 1) {
+      return 'en';
+    }
+
+    return detections[0].language;
+  }
+
+  return detections.language;
+}
 
 setInterval(async () => {
   if (new Date().getHours() === 11) {
@@ -70,9 +87,9 @@ const respondToMessage = async (event: GenericMessageEvent | AppMentionEvent): P
   return aiMessage(event);
 }
 
-const getSystemMessage = (user: string): Message => ({
+const getSystemMessage = (user: string, language: string): Message => ({
   role: 'system',
-  content: `Olet ystävällinen Alkon chat asiakaspalvelija. Vastaa viestiin hauskasti. Olisi myös hyvä jos viestissä suositeltaisiin jotain alkoholijuomaa liittyen käyttäjän viestiin tai hetkeen jos se sopii tilanteeseen. Asiakas: ${user}. Tänään on: ${new Date().toString()} Vastaa aina sillä kielellä millä asiakas on viestin lähettänyt.`,
+  content: `Olet ystävällinen Alkon chat asiakaspalvelija. Vastaa viestiin hauskasti. Olisi myös hyvä jos viestissä suositeltaisiin jotain alkoholijuomaa liittyen käyttäjän viestiin tai hetkeen jos se sopii tilanteeseen. Asiakas: ${user}. Tänään on: ${new Date().toString()}. Vastaa kielellä "${language}".`,
 });
 
 const aiMessage = async (event: GenericMessageEvent | AppMentionEvent): Promise<string | undefined> => {
@@ -93,8 +110,9 @@ const aiMessage = async (event: GenericMessageEvent | AppMentionEvent): Promise<
       role: 'user',
       content: text,
     };
+
     const queryMessages: Message[] = [
-      getSystemMessage( userInfo.user?.profile?.display_name || ''),
+      getSystemMessage( userInfo.user?.profile?.display_name || '', await getLanguage(text)),
       getIsClosedDataMessage(await alkoIsClosed()),
       ...contextMessages.messages.map((message): Message => ({
         role: message.user === ALKO_BOT_ID ? 'assistant' :'user',
@@ -119,17 +137,20 @@ slackApp.event('message', async ({ event, say }) => {
   }
 
   const { thread_ts } = event;
-  const initialMessage = await say({ text: ':drumrolll:', thread_ts });
+  //const initialMessage = await say({ text: ':drumrolll:', thread_ts });
   try {
     const message = await respondToMessage(event);
-    await slackApp.client.chat.update({ text: message, channel: event.channel, ts: initialMessage.ts });
+    //await slackApp.client.chat.update({ text: message, channel: event.channel, ts: initialMessage.ts });
+    await say({ text: message, thread_ts });
   } catch (error) {
-    await slackApp.client.chat.update({ text: "Error happened, I'm sorry :sadrobot:", channel: event.channel, ts: initialMessage.ts });
+    //await slackApp.client.chat.update({ text: "Error happened, I'm sorry :sadrobot:", channel: event.channel, ts: initialMessage.ts });
+    await say({ text: "Error happened, I'm sorry :sadrobot:", thread_ts });
   }
 });
 
 (async () => {
   // Start the app
   await slackApp.start(8080);
+  googleTranslate = new v2.Translate({ key: process.env.GOOGLE_TRANSLATE_API_KEY });
   console.log('Alkobot is running!');
 })();

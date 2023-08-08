@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Vincit/alkobot#readme",
   "dependencies": {
+    "@google-cloud/translate": "^8.0.0",
     "@slack/bolt": "^3.12.2",
     "date-holidays": "^3.18.0",
     "fs": "^0.0.1-security",
