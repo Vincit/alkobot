@@ -144,6 +144,7 @@ slackApp.event('message', async ({ event, say }) => {
     //await slackApp.client.chat.update({ text: message, channel: event.channel, ts: initialMessage.ts });
     await say({ text: message, thread_ts });
   } catch (error) {
+    console.log(error);
     //await slackApp.client.chat.update({ text: "Error happened, I'm sorry :sadrobot:", channel: event.channel, ts: initialMessage.ts });
     await say({ text: "Error happened, I'm sorry :sadrobot:", thread_ts });
   }
