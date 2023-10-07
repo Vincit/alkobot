@@ -100,9 +100,10 @@ const getSystemMessage = (user: string, language: string): Message => ({
 
 const aiMessage = async (event: GenericMessageEvent | AppMentionEvent): Promise<string | undefined> => {
   const { text, user, channel, thread_ts, ts } = event;
-  const userInfo = await slackApp.client.users.info({ user });
   let message = undefined;
   try {
+    const userInfo = await slackApp.client.users.info({ user });
+
     const fiveHrs = 60 * 60 * 12;
     let contextMessages: ConversationsHistoryResponse;
 
@@ -128,7 +129,7 @@ const aiMessage = async (event: GenericMessageEvent | AppMentionEvent): Promise<
     ];
     message = await openAiMessage(queryMessages);
   } catch (error) {
-
+    console.log(error);
   }
   return message;
 }
