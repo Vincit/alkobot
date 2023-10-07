@@ -1,10 +1,10 @@
-import {App, AppMentionEvent, KnownEventFromType} from "@slack/bolt";
+import { App, AppMentionEvent, KnownEventFromType } from "@slack/bolt";
 import alkoIsClosed from "./alkoIsClosed"
 import alkoSearch from "./alkoSearch";
 import isClosedMessage from "./isClosedMessage";
-import {GenericMessageEvent} from "@slack/bolt/dist/types/events/message-events";
+import { GenericMessageEvent } from "@slack/bolt/dist/types/events/message-events";
 import getIsClosedDataMessage from "./getIsClosedDataMessage";
-import openAiMessage, {Message} from "./openAiMessage";
+import openAiMessage, { Message } from "./openAiMessage";
 import { ConversationsHistoryResponse } from "@slack/web-api";
 import { v2 } from "@google-cloud/translate";
 
@@ -17,7 +17,11 @@ const slackApp = new App({
 
 let googleTranslate: v2.Translate = null;
 
-async function getLanguage(text) {
+async function getLanguage(text: string) {
+  if (!text.length) {
+    return 'en';
+  }
+
   let [detections] = await googleTranslate.detect(text);
 
   if (Array.isArray(detections)) {
@@ -32,7 +36,7 @@ async function getLanguage(text) {
 }
 
 setInterval(async () => {
-  if (new Date().getHours() === 11) {
+  if (new Date().getHours() === 8) {
     const closed = await alkoIsClosed();
     if (!closed.today && closed.tomorrow) {
       const conversations = await slackApp.client.users.conversations({
@@ -45,6 +49,7 @@ setInterval(async () => {
           slackApp.client.conversations.leave({ channel: id });
         } else {
           const info = await slackApp.client.conversations.info({ channel: id });
+          console.log('Channel: ' + name + ', topic: ' + info?.channel?.topic?.value + ', purpose: ' + info?.channel?.purpose?.value);
           slackApp.client.chat.postMessage({ channel: id, text: await isClosedMessage(closed, getLanguage(info?.channel?.topic?.value || '')) });
         }
       });
@@ -66,7 +71,7 @@ slackApp.event('app_mention', async ({ event, say }) => {
   const queryWithoutMention = text.slice(userMentionString.length).trim();
 
   if (queryWithoutMention.length < 2) {
-    const message = await isClosedMessage(await alkoIsClosed(), getLanguage(text));
+    const message = await isClosedMessage(await alkoIsClosed(), 'en');
     await say({ text: message, thread_ts: event.thread_ts });
     return;
   }
@@ -82,7 +87,7 @@ slackApp.event('app_mention', async ({ event, say }) => {
 });
 
 const respondToMessage = async (event: GenericMessageEvent | AppMentionEvent): Promise<string> => {
-  const { text} = event as GenericMessageEvent;
+  const { text } = event as GenericMessageEvent;
   let message = await alkoSearch(text);
   if (message) return message;
   return aiMessage(event);
@@ -101,7 +106,7 @@ const aiMessage = async (event: GenericMessageEvent | AppMentionEvent): Promise<
     const fiveHrs = 60 * 60 * 12;
     let contextMessages: ConversationsHistoryResponse;
 
-    if(thread_ts) {
+    if (thread_ts) {
       contextMessages = await slackApp.client.conversations.replies({ channel, ts: thread_ts, limit: 20 });
     } else {
       contextMessages = await slackApp.client.conversations.history({ channel, oldest: `${Number(ts) - fiveHrs}`, limit: 20 });
@@ -113,10 +118,10 @@ const aiMessage = async (event: GenericMessageEvent | AppMentionEvent): Promise<
     };
 
     const queryMessages: Message[] = [
-      getSystemMessage( userInfo.user?.profile?.display_name || '', await getLanguage(text)),
+      getSystemMessage(userInfo.user?.profile?.display_name || '', await getLanguage(text)),
       getIsClosedDataMessage(await alkoIsClosed()),
       ...contextMessages.messages.map((message): Message => ({
-        role: message.user === ALKO_BOT_ID ? 'assistant' :'user',
+        role: message.user === ALKO_BOT_ID ? 'assistant' : 'user',
         content: message.text || '',
       })),
       userMessage,
