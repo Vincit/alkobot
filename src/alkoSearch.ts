@@ -13,7 +13,7 @@ export default async (query: string) => {
   let message;
   try {
     const data = await fetchAlkoData();
-    const stores = data.stores.filter(store => store.outletTypeId === 'outletType_myymalat').filter(store => store.name.toLowerCase().includes(query.toLowerCase()));
+    const stores = data.stores.filter(store => store.outletTypeId === 'outletType_myymalat').filter(store => store.name?.toLowerCase().includes(query.toLowerCase()));
     message = stores.map(store => `${linkMaker(store)}
 Avoinna tänään: ${store.OpenDay0 === '0' ? 'Suljettu' : store.OpenDay0}
 Avoinna huomenna: ${store.OpenDay1 === '0' ? 'Suljettu' : store.OpenDay1}`).join(`
